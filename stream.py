@@ -9,7 +9,7 @@ import time
 import socketserver
 import math
 from http import server
-from flask import Flask, Response, request, redirect
+from flask import Flask, Response, make_response, request, redirect
 from threading import Condition
 from picamera2.outputs import FileOutput
 from lib.helpers import get_env, exit_self
@@ -189,6 +189,7 @@ MODES = {
 
 frame_delay = ENV['frame_delay']
 
+
 class StreamingOutput(io.BufferedIOBase):
   def __init__(self):
     self.frame = None
@@ -199,9 +200,11 @@ class StreamingOutput(io.BufferedIOBase):
       self.frame = buf
       self.condition.notify_all()
 
+
 class StreamingServer(socketserver.ThreadingMixIn, server.HTTPServer):
   allow_reuse_address = True
   daemon_threads = True
+
 
 def stop_start(quality=CONTROLS['Quality']['value']):
   output = StreamingOutput()
@@ -215,6 +218,7 @@ def stop_start(quality=CONTROLS['Quality']['value']):
   picam2.start_recording(encoder, FileOutput(output))
   return output
 
+
 def relay():
   output = stop_start(quality=CONTROLS['Quality']['value'])
 
@@ -227,6 +231,21 @@ def relay():
 
     yield (b'--frame\r\nContent-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
 
+
+def respond(data, content_type='application/json'):
+  response = make_response(data)
+  response.headers['Content-Type'] = content_type
+  return response
+
+
+@app.after_request
+def add_header(response):
+  response.headers['Access-Control-Allow-Origin'] = '*'
+  response.headers['Access-Control-Allow-Headers'] = 'Content-Type'
+  response.headers['Access-Control-Request-Methods'] = 'GET,PUT,POST,DELETE,OPTIONS'
+  return response
+
+
 @app.route('/')
 def on_slash():
   return Response(relay(), mimetype='multipart/x-mixed-replace; boundary=frame')
@@ -234,19 +253,19 @@ def on_slash():
 
 @app.route('/meta')
 def on_meta():
-  return json.dumps(formatted_meta())
+  return respond(json.dumps(formatted_meta()))
 
 
 @app.route('/modes')
 def on_modes():
-  return json.dumps(MODES)
+  return respond(json.dumps(MODES))
 
 
 @app.route('/mode', methods = ['POST'])
 def on_mode():
   body = request.get_json()
   set_mode(body['mode'])
-  return json.dumps(formatted_meta())
+  return respond(json.dumps(formatted_meta()))
 
 
 @app.route('/controls', methods = ['POST'])
@@ -265,7 +284,8 @@ def on_controls():
   except Exception as e:
     logging.error(e)
 
-  return json.dumps(formatted_meta())
+  return respond(json.dumps(formatted_meta()))
+
 
 def formatted_meta():
   formatted = dict()
@@ -289,6 +309,7 @@ def formatted_meta():
       logging.error(e)
 
   return formatted
+
 
 def set_mode(mode):
   set_default_controls()
@@ -322,6 +343,7 @@ def set_default_controls():
 
   logging.info(controls)
   picam2.set_controls(controls)
+
 
 def set_controls(body={}):
   controls = dict()
