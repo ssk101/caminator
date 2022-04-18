@@ -56,7 +56,8 @@ meson build --buildtype=release \
 -Dcam=disabled \
 -Dqcam=enabled \
 -Ddocumentation=disabled \
--Dpycamera=enabled
+-Dpycamera=enabled \
+-Dwerror=false
 ninja -C build # use -j 2 on Raspberry Pi 3 or earlier devices
 sudo ninja -C build install
 
