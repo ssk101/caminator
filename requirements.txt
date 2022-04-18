@@ -1,0 +1,8 @@
+pyopengl
+piexif
+meson
+pyyaml
+ply
+jinja2
+numpy
+simplejpeg

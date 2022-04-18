@@ -1,0 +1,6 @@
+libcamera
+kmsxx
+picamera2
+python-v4l2
+.env
+__pycache__
