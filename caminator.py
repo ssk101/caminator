@@ -19,8 +19,9 @@ ENV = Environment(
   autoescape=select_autoescape()
 )
 
-template = ENV.get_template('camerator.html.jinja')
+template = ENV.get_template('index.html.jinja')
 PAGE = template.render({
+  'TITLE': 'Caminator',
   'WIDTH': WIDTH,
   'HEIGHT': HEIGHT,
 })
