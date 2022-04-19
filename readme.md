@@ -65,7 +65,6 @@ cd ../kmsxx/
 meson build
 ninja -C build
 
-cd ..
 echo "CAMERATOR_PATH=$HOME/git/camerator" >> ~/.bashrc # or wherever you clone this repo
 echo 'export PYTHONPATH="$CAMERATOR_PATH/picamera2:$CAMERATOR_PATH/libcamera/build/src/py:$CAMERATOR_PATH/kmsxx/build/py:$CAMERATOR_PATH/python-v4l2"' >> ~/.bashrc
 source ~/.bashrc

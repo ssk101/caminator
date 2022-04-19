@@ -6,3 +6,4 @@ ply
 jinja2
 numpy
 simplejpeg
+pillow
