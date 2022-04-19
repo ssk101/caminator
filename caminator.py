@@ -36,7 +36,6 @@ class StreamingOutput(io.BufferedIOBase):
       self.frame = buf
       self.condition.notify_all()
 
-
 class StreamingHandler(server.BaseHTTPRequestHandler):
   def do_GET(self):
     if self.path == '/':
@@ -50,6 +49,7 @@ class StreamingHandler(server.BaseHTTPRequestHandler):
       self.send_header('Content-Length', len(content))
       self.end_headers()
       self.wfile.write(content)
+
     elif self.path == '/stream.mjpg':
       self.send_response(200)
       self.send_header('Age', 0)
