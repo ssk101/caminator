@@ -1,17 +1,22 @@
 #!/usr/bin/python3
 
-from picamera2.picamera2 import *
-from picamera2.encoders.jpeg_encoder import *
+import os
 import io
 import logging
 import socketserver
 from threading import Condition, Thread
 from http import server
 from jinja2 import Environment, FileSystemLoader, select_autoescape
+from picamera2.picamera2 import *
+from picamera2.encoders.jpeg_encoder import *
 
-WIDTH  = 2592
-HEIGHT = 1944
-PORT   = 8888
+WIDTH  = int(os.getenv('CAMINATOR_VIDEO_WIDTH', 2592))
+HEIGHT = int(os.getenv('CAMINATOR_VIDEO_HEIGHT', 1944))
+PORT   = int(os.getenv('CAMINATOR_PORT', 8888))
+TITLE  = str(os.getenv('CAMINATOR_TITLE', 'Caminator'))
+
+# print(os.getcwd())
+# print(os.path.realpath())
 
 file_loader = FileSystemLoader('templates')
 ENV = Environment(
