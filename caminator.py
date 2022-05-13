@@ -9,6 +9,7 @@ from http import server
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 from picamera2.picamera2 import *
 from picamera2.encoders.jpeg_encoder import *
+# from picamera2.encoders.output import FileOutput
 
 WIDTH  = int(os.getenv('CAMINATOR_VIDEO_WIDTH', 2592))
 HEIGHT = int(os.getenv('CAMINATOR_VIDEO_HEIGHT', 1944))
@@ -87,11 +88,24 @@ class StreamingServer(socketserver.ThreadingMixIn, server.HTTPServer):
     daemon_threads = True
 
 
+
 picam2 = Picamera2()
-picam2.start_preview()
-picam2.configure(picam2.video_configuration(main={"size": (WIDTH, HEIGHT)}))
+# picam2.start_preview()
+config = picam2.configure(picam2.video_configuration(
+  main={
+    "size": (WIDTH, HEIGHT),
+    "buffer_count": 8
+  }
+))
+
 output = StreamingOutput()
-picam2.start_recording(JpegEncoder(), output)
+
+overlay = np.zeros((300, 400, 4), dtype=np.uint8)
+overlay[:150, 200:] = (255, 0, 0, 64)
+overlay[150:, :200] = (0, 255, 0, 64)
+overlay[150:, 200:] = (0, 0, 255, 64)
+picam2.start_recording(JpegEncoder(q=25), FileOutput(output))
+picam2.set_overlay(overlay)
 
 try:
   address = ('', PORT)

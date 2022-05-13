@@ -4,3 +4,4 @@ picamera2
 python-v4l2
 .env
 __pycache__
+*.swp
