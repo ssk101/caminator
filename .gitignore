@@ -5,3 +5,5 @@ python-v4l2
 .env
 __pycache__
 *.swp
+node_modules
+*.log

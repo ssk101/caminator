@@ -1,7 +1,7 @@
 <html>
 <head>
-  <title>{{ TITLE }}</title>
-  <link rel="shortcut icon" type="image/png" href="favicon.ico">
+  <title>$CAMINATOR_TITLE</title>
+  <link rel="shortcut icon" type="image/png" href="favicon.png">
   <style>
     html, body {
       padding: 0;
@@ -33,7 +33,11 @@
 </head>
 <body>
   <main>
-    <img src="stream.mjpg" width="{{ WIDTH }}" height="{{ HEIGHT }}" />
+    <img
+      src="$CAMINATOR_STREAM_URL"
+      width="$CAMINATOR_VIDEO_WIDTH"
+      height="$CAMINATOR_VIDEO_HEIGHT"
+    />
   </main>
 </body>
 </html>
