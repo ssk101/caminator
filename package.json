@@ -11,7 +11,7 @@
   },
   "scripts": {
     "start": "node ./caminator.js",
-    "pm2": "pm2 start ecosystem.config.js && pm2 logs"
+    "pm2": "pm2 start ecosystem.config.cjs && pm2 logs"
   },
   "dependencies": {
     "compression": "^1.7.4",

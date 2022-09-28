@@ -18,8 +18,7 @@ def create_camera(
   height=ENV['height'],
   quality=ENV['quality']
 ):
-  picam = Picamera2()
-  video_config = picam.video_configuration(main={"size": (width, height)})
-  picam.configure(video_config)
+  picam2 = Picamera2()
+  picam2.video_configuration.size = (width, height)
   encoder = Encoder(q=quality)
-  return picam, encoder
+  return picam2, encoder

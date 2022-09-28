@@ -8,3 +8,4 @@ jinja2
 numpy
 simplejpeg
 pillow
+streamlit-webrtc
