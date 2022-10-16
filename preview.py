@@ -13,11 +13,9 @@ if __name__ == "__main__":
       picam2 = Picamera2()
       picam2.start_preview(Preview.QTGL, width=ENV['width'], height=ENV['height'])
 
-      controls = {"ExposureTime": 200000, "AnalogueGain": 100.0}
 
       preview_config = picam2.create_preview_configuration(
-        {'size': (ENV['width'], ENV['height'])},
-        controls=controls
+        {'size': (ENV['width'], ENV['height'])}
       )
       picam2.configure(preview_config)
       picam2.start()

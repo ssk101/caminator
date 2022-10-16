@@ -8,6 +8,7 @@
       margin: 0;
       background: #000;
       color: #fff;
+      font-size: 16px;
     }
     body {
       display: flex;
@@ -21,8 +22,8 @@
       justify-content: center;
       align-items: center;
       height: 100%;
-      padding: .5em;
       box-sizing: border-box;
+      position: relative;
     }
     img {
       width: 100%;
@@ -32,16 +33,48 @@
       border: 1px solid #444;
       box-sizing: border-box;
     }
+    #controls button {
+      padding: 0;
+    }
+    #controls {
+      display: grid;
+      grid-auto-flow: column;
+      grid-gap: 5px;
+      padding: 5px;
+      font-size: .8em;
+      box-sizing: border-box;
+      position: absolute;
+      bottom: 0;
+      left: 0;
+    }
+    #controls .control {
+      display: grid;
+      grid-gap: 0px;
+      justify-items: center;
+    }
+    #controls .control label {
+      background: #000;
+      color: #fff;
+      border-radius: 2px;
+      padding: 2px 4px;
+    }
+    #controls .control input {
+      height: 32px;
+      width: 100px;
+    }
   </style>
 </head>
 <body>
-  <script src="index.js" type="module"></script>
-  <main>
+  <script src="./index.js" type="module"></script>
+  <main data-root="$CAMINATOR_ROOT">
     <img
       src="$CAMINATOR_STREAM_URL"
       width="$CAMINATOR_VIDEO_WIDTH"
       height="$CAMINATOR_VIDEO_HEIGHT"
     />
+
+    <div id="controls">
+    </div>
   </main>
 </body>
 </html>

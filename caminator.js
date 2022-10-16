@@ -34,11 +34,13 @@ function getLocalIP() {
   return localIP
 }
 
+const CAMINATOR_ROOT = `http://${getLocalIP()}:${process.env.CAMINATOR_PORT || 8888}`
+
 const {
   CAMINATOR_VIDEO_WIDTH = 2592,
   CAMINATOR_VIDEO_HEIGHT = 1944,
   CAMINATOR_TITLE = 'Caminator',
-  CAMINATOR_STREAM_URL = `http://${getLocalIP()}:${process.env.CAMINATOR_PORT || 8888}/stream`
+  CAMINATOR_STREAM_URL = `${CAMINATOR_ROOT}/stream`
 } = process.env
 
 export async function createServer(config = {}) {
@@ -133,6 +135,7 @@ export async function createApp(config = {}) {
       CAMINATOR_VIDEO_HEIGHT,
       CAMINATOR_TITLE,
       CAMINATOR_STREAM_URL,
+      CAMINATOR_ROOT,
     },
   }
 
@@ -161,7 +164,7 @@ export async function createApp(config = {}) {
     app.use(middleware)
   }
 
-  app.use(express.static(settings.publicDir))
+  app.use(express.static(path.join(__dirname, settings.publicDir)))
 
   return { app }
 }
@@ -180,7 +183,7 @@ async function killScript() {
       execSync([
         'pkill',
         '-f',
-        "'(python3.*stream\.py)'",
+        "'(stream\.py)'",
       ].join(' '))
     } catch (e) {
       console.log('no scripts to kill')
