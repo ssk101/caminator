@@ -1,11 +1,3 @@
-cmake
-pyopengl
-piexif
-meson
-pyyaml
-ply
-jinja2
-numpy
-simplejpeg
-pillow
-streamlit-webrtc
+Flask==2.1.0
+picamera2
+py-mjpeg

@@ -33,5 +33,6 @@ def get_env():
     'height' : int(os.getenv('CAMINATOR_VIDEO_HEIGHT', 1944)),
     'quality': int(os.getenv('CAMINATOR_QUALITY', 50)),
     'port'   : int(os.getenv('CAMINATOR_PORT', 8888)),
+    'host'   : str(os.getenv('CAMINATOR_HOST', '0.0.0.0')),
     'title'  : str(os.getenv('CAMINATOR_TITLE', 'Caminator')),
   }
