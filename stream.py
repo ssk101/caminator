@@ -7,7 +7,7 @@ import json
 import logging
 import time
 from flask import Flask, Response, request
-from mjpeg.server import MJPEGResponse
+from threading import Condition
 from picamera2.outputs import FileOutput
 from lib.helpers import get_env, exit_self
 from lib.camera import create_camera
@@ -130,31 +130,42 @@ CONTROLS = {
   },
 }
 
-output = MJPEGResponse()
+class StreamingOutput(io.BufferedIOBase):
+  def __init__(self):
+    self.frame = None
+    self.condition = Condition()
+
+  def write(self, buf):
+    with self.condition:
+      self.frame = buf
+      self.condition.notify_all()
+
+stream = StreamingOutput()
 
 def relay():
   while True:
-    buf = client.dequeue_buffer()
-    yield memoryview(buf.data)[:buf.used]
-    client.enqueue_buffer(buf)
+    with stream.condition:
+      time.sleep(0.2)
+      stream.condition.wait()
+      yield (b'--frame\r\nContent-Type: image/jpeg\r\n\r\n' + stream.frame + b'\r\n')
 
 @app.route('/')
-def on_stream():
-  return MJPEGResponse(relay())
+def on_slash():
+  return Response(relay(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
 @app.route('/meta')
 def on_meta():
-  return json.dumps({ 'meta': formatted_meta() })
+  return json.dumps(formatted_meta())
 
 @app.route('/quality', methods = ['POST'])
-async def on_quality():
+def on_quality():
   body = request.get_json()
-  await picam2.stop_recording()
-  await start_camera(quality=body)
-  return json.dumps({ 'meta': formatted_meta() })
+  picam2.stop_recording()
+  start_camera(quality=body)
+  return json.dumps(formatted_meta())
 
 @app.route('/controls', methods = ['POST'])
-async def on_controls():
+def on_controls():
   response = dict()
 
   try:
@@ -169,7 +180,7 @@ async def on_controls():
   except Exception as e:
     logging.error(e)
 
-  return json.dumps({ 'meta': formatted_meta() })
+  return json.dumps(formatted_meta())
 
 def formatted_meta():
   formatted = dict()
@@ -210,8 +221,6 @@ def set_camera_meta(meta={}):
     logging.error(e)
 
 def start_camera(quality=20):
-  # output = MJPEGResponse()
-
   try:
     picam2, encoder = create_camera(quality=quality)
 

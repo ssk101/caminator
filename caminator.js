@@ -40,7 +40,7 @@ const {
   CAMINATOR_VIDEO_WIDTH = 2592,
   CAMINATOR_VIDEO_HEIGHT = 1944,
   CAMINATOR_TITLE = 'Caminator',
-  CAMINATOR_STREAM_URL = `${CAMINATOR_ROOT}/stream`
+  CAMINATOR_STREAM_URL = `${CAMINATOR_ROOT}`
 } = process.env
 
 export async function createServer(config = {}) {
