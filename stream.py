@@ -33,14 +33,14 @@ CONTROLS = {
   'AeConstraintMode': {
     'type': 'int',
     'control': 'range',
-    'value': 0,
+    'value': 1,
     'min': 0,
     'max': 3,
   },
   'AeExposureMode': {
     'type': 'int',
     'control': 'range',
-    'value': 0,
+    'value': 2,
     'min': 0,
     'max': 3,
   },
@@ -54,7 +54,7 @@ CONTROLS = {
   'NoiseReductionMode': {
     'type': 'int',
     'control': 'range',
-    'value': 0,
+    'value': 1,
     'min': 0,
     'max': 2,
   },
@@ -84,21 +84,24 @@ CONTROLS = {
     'step': 1000,
     'min': 0,
     'max': 200000,
+    # 'value': 200000,
     'value': 63835,
   },
   'ExposureValue': {
     'type': 'float',
     'control': 'range',
-    'step': 0.1,
+    'step': 1.0,
     'value': 0.0,
     'min': -8.0,
     'max': 8.0,
   },
   'AnalogueGain': {
-    'type': 'int',
+    'type': 'float',
     'control': 'range',
     'step': 1,
-    'value': 8,
+    'value': 0.0,
+    'min': -8.0,
+    'max': 8.0,
   },
   'Brightness': {
     'type': 'float',
@@ -277,10 +280,15 @@ def start_camera(quality=20):
 
   try:
     picam2, encoder = create_camera(quality=quality)
-    picam2.start_recording(encoder, FileOutput(output))
-    return picam2, output
+
+    try:
+      picam2.start_recording(encoder, FileOutput(output))
+      return picam2, output
+    except Exception as e:
+      logging.error(e)
+
   except Exception as e:
-    logging.warn(e)
+    logging.error(e)
 
 picam2, output = start_camera(quality=20)
 set_camera_meta()
