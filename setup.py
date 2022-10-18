@@ -13,7 +13,7 @@ setuptools.setup(
     description = 'picamera2 streamer',
     long_description = long_description,
     long_description_content_type = 'text/markdown',
-    url = 'https://github.com/ssk101/caminator',
+    url = 'https://github.com/steelskysoftware/caminator',
     packages = setuptools.find_packages(),
     classifiers = [
         'Programming Language :: Python :: 3',

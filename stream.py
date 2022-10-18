@@ -130,6 +130,8 @@ CONTROLS = {
   },
 }
 
+output = MJPEGResponse()
+
 def relay():
   while True:
     buf = client.dequeue_buffer()
@@ -208,7 +210,7 @@ def set_camera_meta(meta={}):
     logging.error(e)
 
 def start_camera(quality=20):
-  output = StreamingOutput()
+  # output = MJPEGResponse()
 
   try:
     picam2, encoder = create_camera(quality=quality)
