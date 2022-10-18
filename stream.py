@@ -225,15 +225,15 @@ def start_camera(quality=20):
     picam2, encoder = create_camera(quality=quality)
 
     try:
-      picam2.start_recording(encoder, FileOutput(output))
-      return picam2, output
+      picam2.start_recording(encoder, FileOutput(stream))
+      return picam2
     except Exception as e:
       logging.error(e)
 
   except Exception as e:
     logging.error(e)
 
-picam2, output = start_camera(quality=20)
+picam2 = start_camera(quality=20)
 set_camera_meta()
 
 if __name__ == '__main__':
