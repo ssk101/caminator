@@ -13,33 +13,56 @@ async function getMeta() {
 let waiting
 
 function makeControlGroup(controlType, controlName, value, cb) {
+  const makeInput = (v) => {
+    const input = Object.assign(document.createElement('input'), {
+      name: controlName,
+      placeholder: controlName,
+      type: controlType,
+      oninput: (e) => {
+        debounce(() => cb(e))
+      },
+    })
+
+    if(typeof v === 'boolean') {
+      input.checked = v
+      input.value = v
+    } else if(typeof v === 'number') {
+      input.value = parseFloat(v)
+    }
+
+    return input
+  }
+  const makeLabel = (v) => {
+    return Object.assign(document.createElement('label'), {
+      textContent: `${controlName}: ${v}`,
+    })
+  }
+
   const controlGroup = Object.assign(document.createElement('div'), {
     className: `control ${controlName}`,
   })
 
-  const label = Object.assign(document.createElement('label'), {
-    textContent: `${controlName}: ${value}`,
-    for: controlName,
-  })
+  for(const [i, v] of Object.entries([value].flat())) {
+    const inputs = Object.assign(document.createElement('div'), {
+      className: 'inputs',
+    })
 
-  const input = Object.assign(document.createElement('input'), {
-    id: controlName,
-    placeholder: controlName,
-    type: controlType,
-    value,
-    oninput: (e) => {
-      debounce(() => cb(e))
-    },
-  })
+    Object.assign(inputs.dataset, {
+      index: i,
+      values: value,
+    })
 
-  controlGroup.append(label, input)
+    inputs.append(makeLabel(v), makeInput(v))
+    controlGroup.append(inputs)
+  }
+
   return controlGroup
 }
 
 for(const [controlName, controlData] of Object.entries(await getMeta())) {
-  const { control, value } = controlData
+  const { controlType, value } = controlData
   const controlGroup = makeControlGroup(
-    control,
+    controlType,
     controlName,
     value,
     setControls,
@@ -76,27 +99,37 @@ const debounce = (cb, delay = 1000) => {
 
 async function update(meta) {
   for(const [controlName, controlData] of Object.entries(meta)) {
-    const value = controlData.value
-    controls.querySelector(`.${controlName} label`).textContent = `${controlName}: ${value}`
-    controls.querySelector(`.${controlName} input`).value = value
+    const { value } = controlData
+
+    for(const [i, v] of Object.entries([value].flat())) {
+      const inputs = controls.querySelector(`.${controlName} .inputs[data-index="${i}"]`)
+      inputs.dataset.values = value
+      inputs.querySelector('label').textContent = `${controlName}: ${v}`
+      inputs.querySelector('input').value = v
+    }
   }
 }
 
-function getControls() {
-  return Array.from(controls.querySelectorAll('input')).reduce((acc, input) => {
-    acc[input.id] = input.value
-    return acc
-  }, {})
-}
-
 async function setControls(e) {
+  const inputs = e.target.parentElement
+  const values = []
+
+  for(const input of Array.from(inputs.querySelectorAll('input'))) {
+    const v = input.value
+    values.push(v)
+  }
+
+  const actualValues = values.length === 1 ? values[0] : values
+
+  inputs.dataset.values = actualValues
+
   const response = await fetch(`${main.dataset.root}/controls`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      [e.target.id]: Number(e.target.value),
+      [e.target.name]: actualValues,
     })
   }).then(res => res.json())
 

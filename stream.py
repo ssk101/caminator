@@ -22,83 +22,82 @@ TYPES = {
   'bool': bool,
   'list': list,
   'str': str,
-  'dict': dict
+  'dict': dict,
+  'tuple': tuple,
 }
 
 CONTROLS = {
   'AeEnable': {
     'type': 'int',
-    'control': 'checkbox',
+    'controlType': 'checkbox',
     'value': True,
   },
   'AeConstraintMode': {
     'type': 'int',
-    'control': 'range',
-    'value': 1,
+    'controlType': 'range',
+    'value': 0,
     'min': 0,
     'max': 3,
   },
   'AeExposureMode': {
     'type': 'int',
-    'control': 'range',
-    'value': 2,
+    'controlType': 'range',
+    'value': 0,
     'min': 0,
-    'max': 3,
+    'max': 2,
   },
   'AeMeteringMode': {
     'type': 'int',
-    'control': 'range',
+    'controlType': 'range',
     'value': 0,
     'min': 0,
     'max': 3,
   },
   'NoiseReductionMode': {
     'type': 'int',
-    'control': 'range',
-    'value': 1,
+    'controlType': 'range',
+    'value': 0,
     'min': 0,
     'max': 2,
   },
   'AwbEnable': {
     'type': 'int',
-    'control': 'checkbox',
+    'controlType': 'checkbox',
     'value': True,
   },
   'AwbMode': {
     'type': 'int',
-    'control': 'range',
+    'controlType': 'range',
     'step': 1,
     'value': 0,
     'min': 0,
     'max': 6,
   },
   'FrameDurationLimits': {
-    'type': 'list',
-    'control': 'range',
+    'type': 'tuple',
+    'controlType': 'input',
     'step': 0,
     'value': [0, 0],
-    'enabled': False,
   },
   'ExposureTime': {
     'type': 'int',
-    'control': 'range',
+    'controlType': 'range',
     'step': 1000,
     'min': 0,
     'max': 200000,
-    # 'value': 200000,
-    'value': 63835,
+    'value': 1000,
   },
   'ExposureValue': {
     'type': 'float',
-    'control': 'range',
-    'step': 1.0,
+    'controlType': 'range',
+    'step': 1,
     'value': 0.0,
     'min': -8.0,
     'max': 8.0,
   },
   'AnalogueGain': {
     'type': 'float',
-    'control': 'range',
+    'controlType': 'range',
     'step': 1,
     'value': 0.0,
     'min': -8.0,
@@ -106,7 +105,7 @@ CONTROLS = {
   },
   'Brightness': {
     'type': 'float',
-    'control': 'range',
+    'controlType': 'range',
     'step': 0.1,
     'value': 0.0,
     'min': -1.0,
@@ -114,16 +113,16 @@ CONTROLS = {
   },
   'Contrast': {
     'type': 'float',
-    'control': 'range',
-    'step': 0.1,
+    'controlType': 'range',
+    'step': 1,
     'value': 1.0,
     'min': 0.0,
     'max': 32.0,
   },
   'Sharpness': {
     'type': 'float',
-    'control': 'range',
-    'step': 0.1,
+    'controlType': 'range',
+    'step': 1,
     'value': 0.0,
     'min': 0.0,
     'max': 16.0,
@@ -145,7 +144,7 @@ stream = StreamingOutput()
 def relay():
   while True:
     with stream.condition:
-      time.sleep(0.2)
+      time.sleep(0.1)
       stream.condition.wait()
       yield (b'--frame\r\nContent-Type: image/jpeg\r\n\r\n' + stream.frame + b'\r\n')
 
@@ -186,15 +185,15 @@ def formatted_meta():
   formatted = dict()
 
   for key in CONTROLS:
-    if not CONTROLS[key].get('enabled', True):
+    if CONTROLS[key].get('disabled', False):
       continue
 
     t = TYPES[CONTROLS[key]['type']]
 
     try:
       formatted[key] = {
-        'value': str(t(CONTROLS[key]['value'])),
-        'control': CONTROLS[key].get('control'),
+        'value': CONTROLS[key]['value'],
+        'controlType': CONTROLS[key].get('controlType'),
         'min': CONTROLS[key].get('min'),
         'max': CONTROLS[key].get('max'),
         'step': CONTROLS[key].get('step'),
@@ -208,10 +207,12 @@ def set_camera_meta(meta={}):
   sanitized = dict()
 
   for key in CONTROLS:
+    t = TYPES[CONTROLS[key]['type']]
+
     if meta.get(key) is not None:
       CONTROLS[key]['value'] = meta[key]
 
-    sanitized[key] = CONTROLS[key]['value']
+    sanitized[key] = t(CONTROLS[key]['value'])
 
   logging.info(sanitized)
 
