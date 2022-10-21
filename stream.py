@@ -30,12 +30,12 @@ TYPES = {
 
 CONTROLS = {
   'AeEnable': {
-    'type': 'boolean',
+    'type': 'bool',
     'controlType': 'checkbox',
     'value': False,
   },
   'AwbEnable': {
-    'type': 'boolean',
+    'type': 'bool',
     'controlType': 'checkbox',
     'value': False,
   },
