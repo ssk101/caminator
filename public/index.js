@@ -129,7 +129,7 @@ async function setControls(e) {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      [e.target.name]: actualValues,
+      [e.target.name]: Number(actualValues),
     })
   }).then(res => res.json())
 
