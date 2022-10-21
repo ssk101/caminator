@@ -98,14 +98,14 @@ const debounce = (cb, delay = 1000) => {
 }
 
 async function update(meta) {
-  for(const [controlName, controlType, controlData] of Object.entries(meta)) {
+  for(const [controlName, controlData] of Object.entries(meta)) {
     const { value } = controlData
 
     for(const [i, v] of Object.entries([value].flat())) {
       const inputs = controls.querySelector(`.${controlName} .inputs[data-index="${i}"]`)
       inputs.dataset.values = value
       inputs.querySelector('label').textContent = `${controlName}: ${v}`
-      inputs.querySelector('input').value = Number(v)
+      inputs.querySelector('input').value = v
     }
   }
 }
