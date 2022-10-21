@@ -104,9 +104,11 @@ async function update(meta) {
     for(const [i, v] of Object.entries([value].flat())) {
       const inputs = controls.querySelector(`.${controlName} .inputs[data-index="${i}"]`)
       inputs.dataset.values = value
-      inputs.querySelector('label').textContent = `${controlName}: ${v}`
+      Object.assign(inputs.querySelector('label'), {
+        textContent: `${controlName}: ${v}`,
+        title: description.join(', '),
+      })
       inputs.querySelector('input').value = v
-      inputs.title = description.join(', ')
     }
   }
 }
