@@ -24,10 +24,11 @@ function makeControlGroup(controlType, controlName, value, cb) {
     })
 
     if(typeof v === 'boolean') {
-      console.log(v)
+      console.log(1, controlName, { v })
       input.checked = v
       input.value = Number(v)
     } else if(typeof v === 'number') {
+      console.log(2, controlName, v })
       input.value = parseFloat(v)
     }
 
@@ -106,7 +107,7 @@ async function update(meta) {
       const inputs = controls.querySelector(`.${controlName} .inputs[data-index="${i}"]`)
       inputs.dataset.values = value
       inputs.querySelector('label').textContent = `${controlName}: ${v}`
-      inputs.querySelector('input').value = v
+      inputs.querySelector('input').value = Number(v)
     }
   }
 }
