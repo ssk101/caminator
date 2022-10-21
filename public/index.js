@@ -122,6 +122,7 @@ async function setControls(e) {
   const actualValues = values.length === 1 ? values[0] : values
 
   inputs.dataset.values = actualValues
+  console.log({ actualValues })
 
   const response = await fetch(`${main.dataset.root}/controls`, {
     method: 'POST',
