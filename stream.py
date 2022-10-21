@@ -30,9 +30,22 @@ TYPES = {
 
 CONTROLS = {
   'AeEnable': {
-    'type': 'int',
+    'type': 'boolean',
     'controlType': 'checkbox',
     'value': False,
+  },
+  'AwbEnable': {
+    'type': 'boolean',
+    'controlType': 'checkbox',
+    'value': False,
+  },
+  'AwbMode': {
+    'type': 'int',
+    'controlType': 'range',
+    'step': 1,
+    'value': 0,
+    'min': 0,
+    'max': 6,
   },
   'AeConstraintMode': {
     'type': 'int',
@@ -61,19 +74,6 @@ CONTROLS = {
     'value': 1,
     'min': 0,
     'max': 4,
-  },
-  'AwbEnable': {
-    'type': 'int',
-    'controlType': 'checkbox',
-    'value': False,
-  },
-  'AwbMode': {
-    'type': 'int',
-    'controlType': 'range',
-    'step': 1,
-    'value': 0,
-    'min': 0,
-    'max': 6,
   },
   'FrameDurationLimits': {
     'type': 'tuple',
