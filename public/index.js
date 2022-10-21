@@ -24,11 +24,9 @@ function makeControlGroup(controlType, controlName, value, cb) {
     })
 
     if(typeof v === 'boolean') {
-      console.log(1, controlName, v)
       input.checked = v
       input.value = Number(v)
     } else if(typeof v === 'number') {
-      console.log(2, controlName, v)
       input.value = parseFloat(v)
     }
 
@@ -100,7 +98,7 @@ const debounce = (cb, delay = 1000) => {
 }
 
 async function update(meta) {
-  for(const [controlName, controlData] of Object.entries(meta)) {
+  for(const [controlName, controlType, controlData] of Object.entries(meta)) {
     const { value } = controlData
 
     for(const [i, v] of Object.entries([value].flat())) {
@@ -117,14 +115,13 @@ async function setControls(e) {
   const values = []
 
   for(const input of Array.from(inputs.querySelectorAll('input'))) {
-    const v = input.value
+    const v = input.type === 'checkbox' ? Boolean(input.value) : Number(input.value)
     values.push(v)
   }
 
   const actualValues = values.length === 1 ? values[0] : values
 
   inputs.dataset.values = actualValues
-  console.log({ actualValues })
 
   const response = await fetch(`${main.dataset.root}/controls`, {
     method: 'POST',
@@ -132,7 +129,7 @@ async function setControls(e) {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      [e.target.name]: Number(actualValues),
+      [e.target.name]: actualValues,
     })
   }).then(res => res.json())
 
