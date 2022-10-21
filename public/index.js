@@ -24,11 +24,11 @@ function makeControlGroup(controlType, controlName, value, cb) {
     })
 
     if(typeof v === 'boolean') {
-      console.log(1, controlName, { v })
+      console.log(1, controlName, v)
       input.checked = v
       input.value = Number(v)
     } else if(typeof v === 'number') {
-      console.log(2, controlName, v })
+      console.log(2, controlName, v)
       input.value = parseFloat(v)
     }
 
