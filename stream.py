@@ -46,13 +46,15 @@ CONTROLS = {
     'value': 0,
     'min': 0,
     'max': 6,
+    'description': ['Auto', 'Tungsten', 'Fluorescent', 'Indoor', 'Daylight', 'Cloudy'],
   },
   'AeConstraintMode': {
     'type': 'int',
     'controlType': 'range',
     'min': 0,
-    'max': 3,
+    'max': 2,
     'value': 0,
+    'description': ['Normal', 'Highlights', 'Shadows'],
   },
   'AeExposureMode': {
     'type': 'int',
@@ -60,20 +62,23 @@ CONTROLS = {
     'min': 0,
     'max': 2,
     'value': 0,
+    'description': ['Normal', 'Short', 'Long'],
   },
   'AeMeteringMode': {
     'type': 'int',
     'controlType': 'range',
     'min': 0,
-    'max': 3,
+    'max': 2,
     'value': 0,
+    'description': ['CentreWeighted', 'Spot', 'Matrix'],
   },
   'NoiseReductionMode': {
     'type': 'int',
     'controlType': 'range',
     'value': 1,
     'min': 0,
-    'max': 4,
+    'max': 2,
+    'description': ['Off', 'Fast', 'HQ'],
   },
   'FrameDurationLimits': {
     'type': 'tuple',
@@ -208,6 +213,7 @@ def formatted_meta():
         'min': CONTROLS[key].get('min'),
         'max': CONTROLS[key].get('max'),
         'step': CONTROLS[key].get('step'),
+        'description': CONTROLS[key].get('description', []),
       }
     except Exception as e:
       logging.error(e)
@@ -235,15 +241,7 @@ def set_camera_meta(meta={}):
 if __name__ == '__main__':
   try:
     picam2, encoder = create_camera(quality=quality)
-    logging.info('========== CURRENT META ==========')
-    logging.info(picam2.camera_controls)
-    logging.info('==================================')
-
     set_camera_meta()
-
-    logging.info('========== NEW META ==========')
-    logging.info(picam2.camera_controls)
-    logging.info('==================================')
 
     try:
       app.run(host=ENV['host'], port=ENV['port'], threaded=True)
