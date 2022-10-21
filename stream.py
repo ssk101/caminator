@@ -58,7 +58,7 @@ CONTROLS = {
     'type': 'int',
     'controlType': 'range',
     'min': 0,
-    'max': 3,
+    'max': 2,
     'value': 0,
   },
   'AeMeteringMode': {
