@@ -159,6 +159,7 @@ def relay():
   picam2.start_recording(encoder, FileOutput(output))
 
   while True:
+    time.sleep(1 / 15)
     with output.condition:
       output.condition.wait()
       frame = output.frame

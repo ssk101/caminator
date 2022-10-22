@@ -12,7 +12,8 @@ async function getMeta() {
 
 let waiting
 
-function makeControlGroup(controlType, controlName, value, cb) {
+function makeControlGroup(controlType, controlName, value, description, cb) {
+  console.log(description)
   const makeInput = (v) => {
     const input = Object.assign(document.createElement('input'), {
       name: controlName,
@@ -35,6 +36,7 @@ function makeControlGroup(controlType, controlName, value, cb) {
   const makeLabel = (v) => {
     return Object.assign(document.createElement('label'), {
       textContent: `${controlName}: ${v}`,
+      title: description.join(', '),
     })
   }
 
@@ -60,11 +62,12 @@ function makeControlGroup(controlType, controlName, value, cb) {
 }
 
 for(const [controlName, controlData] of Object.entries(await getMeta())) {
-  const { controlType, value } = controlData
+  const { controlType, value, description = [] } = controlData
   const controlGroup = makeControlGroup(
     controlType,
     controlName,
     value,
+    description,
     setControls,
   )
 
@@ -77,14 +80,14 @@ for(const [controlName, controlData] of Object.entries(await getMeta())) {
   controls.insertAdjacentElement('afterbegin', controlGroup)
 }
 
-const qualityControlGroup = makeControlGroup(
-  'number',
-  'quality',
-  20,
-  setQuality,
-)
+// const qualityControlGroup = makeControlGroup(
+//   'number',
+//   'quality',
+//   20,
+//   setQuality,
+// )
 
-controls.insertAdjacentElement('afterbegin', qualityControlGroup)
+// controls.insertAdjacentElement('afterbegin', qualityControlGroup)
 
 const debounce = (cb, delay = 1000) => {
   if(waiting) return
@@ -104,6 +107,7 @@ async function update(meta) {
     for(const [i, v] of Object.entries([value].flat())) {
       const inputs = controls.querySelector(`.${controlName} .inputs[data-index="${i}"]`)
       inputs.dataset.values = value
+
       Object.assign(inputs.querySelector('label'), {
         textContent: `${controlName}: ${v}`,
         title: description.join(', '),
@@ -139,12 +143,12 @@ async function setControls(e) {
   await update(response)
 }
 
-async function setQuality(e) {
-  const response = await fetch(`${main.dataset.root}/quality`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: e.target.value,
-  }).then(res => res.json())
-}
+// async function setQuality(e) {
+//   const response = await fetch(`${main.dataset.root}/quality`, {
+//     method: 'POST',
+//     headers: {
+//       'Content-Type': 'application/json',
+//     },
+//     body: e.target.value,
+//   }).then(res => res.json())
+// }
