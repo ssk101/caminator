@@ -52,9 +52,9 @@ CONTROLS = {
     'type': 'int',
     'controlType': 'range',
     'min': 0,
-    'max': 2,
+    'max': 1,
     'value': 0,
-    'description': ['Normal', 'Highlights', 'Shadows'],
+    'description': ['Normal', 'Highlights'],
   },
   'AeExposureMode': {
     'type': 'int',
