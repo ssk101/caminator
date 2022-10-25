@@ -10,6 +10,7 @@ import terminator from 'http-terminator'
 import { router } from './lib/router.js'
 import { serialize } from './middleware/serialize.js'
 import { errorHandler } from './middleware/error-handler.js'
+import config from './config.json' assert { type: 'json' }
 
 const { createHttpTerminator } = terminator
 
@@ -34,14 +35,23 @@ function getLocalIP() {
   return localIP
 }
 
-const CAMINATOR_ROOT = `http://${getLocalIP()}:${process.env.CAMINATOR_PORT || 8888}`
+const {
+  port,
+  title,
+  width,
+  height,
+  quality,
+} = config
 
 const {
-  CAMINATOR_VIDEO_WIDTH = 2592,
-  CAMINATOR_VIDEO_HEIGHT = 1944,
-  CAMINATOR_TITLE = 'Caminator',
-  CAMINATOR_STREAM_URL = `${CAMINATOR_ROOT}`
+  CAMINATOR_WIDTH = width,
+  CAMINATOR_HEIGHT = height,
+  CAMINATOR_TITLE = title,
+  CAMINATOR_PORT = port,
+  CAMINATOR_QUALITY = quality,
 } = process.env
+
+const CAMINATOR_STREAM_URL = `http://${getLocalIP()}:${CAMINATOR_PORT}`
 
 export async function createServer(config = {}) {
   const { app } = await createApp(config)
@@ -131,11 +141,11 @@ export async function createApp(config = {}) {
     }, config.cors || {}),
     middlewares: [],
     injected: {
-      CAMINATOR_VIDEO_WIDTH,
-      CAMINATOR_VIDEO_HEIGHT,
+      CAMINATOR_WIDTH,
+      CAMINATOR_HEIGHT,
       CAMINATOR_TITLE,
+      CAMINATOR_QUALITY,
       CAMINATOR_STREAM_URL,
-      CAMINATOR_ROOT,
     },
   }
 

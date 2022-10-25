@@ -8,16 +8,14 @@ import logging
 import time
 import socketserver
 from http import server
-from flask import Flask, Response, request
+from flask import Flask, Response, request, redirect
 from threading import Condition
 from picamera2.outputs import FileOutput
 from lib.helpers import get_env, exit_self
 from lib.camera import create_camera, create_encoder
 
 ENV = get_env()
-
 app = Flask(__name__)
-
 TYPES = {
   'int': int,
   'float': float,
@@ -29,6 +27,15 @@ TYPES = {
 }
 
 CONTROLS = {
+  'Quality': {
+    'type': 'int',
+    'controlType': 'range',
+    'description': ['Stream quality'],
+    'step': 1,
+    'min': 0,
+    'max': 100,
+    'value': ENV['quality'],
+  },
   'AeEnable': {
     'type': 'bool',
     'controlType': 'checkbox',
@@ -138,7 +145,7 @@ CONTROLS = {
   },
 }
 
-quality = ENV['quality']
+frame_delay = ENV['frame_delay']
 
 class StreamingOutput(io.BufferedIOBase):
   def __init__(self):
@@ -154,15 +161,28 @@ class StreamingServer(socketserver.ThreadingMixIn, server.HTTPServer):
   allow_reuse_address = True
   daemon_threads = True
 
-def relay():
+def stop_start(quality=CONTROLS['Quality']['value']):
   output = StreamingOutput()
+
+  try:
+    picam2.stop_recording()
+  except Exception as e:
+    pass
+
+  encoder = create_encoder(quality=quality)
   picam2.start_recording(encoder, FileOutput(output))
+  return output
+
+def relay():
+  output = stop_start(quality=CONTROLS['Quality']['value'])
 
   while True:
-    time.sleep(1 / 15)
+    time.sleep(frame_delay)
+
     with output.condition:
       output.condition.wait()
       frame = output.frame
+
     yield (b'--frame\r\nContent-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
 
 @app.route('/')
@@ -171,13 +191,6 @@ def on_slash():
 
 @app.route('/meta')
 def on_meta():
-  return json.dumps(formatted_meta())
-
-@app.route('/quality', methods = ['POST'])
-def on_quality():
-  quality = request.get_json()
-  encoder = create_encoder(quality=quality)
-  picam2.switch_mode(encoder)
   return json.dumps(formatted_meta())
 
 @app.route('/controls', methods = ['POST'])
@@ -227,21 +240,28 @@ def set_camera_meta(meta={}):
   for key in CONTROLS:
     t = TYPES[CONTROLS[key]['type']]
 
-    if meta.get(key) is not None:
+    value = meta.get(key)
+
+    if value is not None:
       CONTROLS[key]['value'] = meta[key]
+
+    if key == 'Quality':
+      if value is not None:
+        stop_start(quality=value)
+      continue
 
     sanitized[key] = t(CONTROLS[key]['value'])
 
   try:
+    logging.info(sanitized)
     picam2.set_controls(sanitized)
   except Exception as e:
     logging.error(e)
 
-
-
 if __name__ == '__main__':
   try:
-    picam2, encoder = create_camera(quality=quality)
+    picam2 = create_camera()
+    stop_start(quality=CONTROLS['Quality']['value'])
     set_camera_meta()
 
     try:

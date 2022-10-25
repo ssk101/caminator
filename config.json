@@ -1,0 +1,10 @@
+{
+  "width": 1296,
+  "height": 972,
+  "quality": 75,
+  "frame_delay": 0.1,
+  "encoder": "jpeg",
+  "port": 8888,
+  "host": "0.0.0.0",
+  "title": "Caminator"
+}

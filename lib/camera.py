@@ -6,24 +6,21 @@ from picamera2.encoders import MJPEGEncoder
 from lib.helpers import get_env, logging
 
 ENV = get_env()
-
 ENCODERS = {
   'jpeg': JpegEncoder,
   'mjpeg': MJPEGEncoder,
   'h264': H264Encoder,
 }
 
-def create_camera(
-  Encoder=ENCODERS['jpeg'],
-  width=ENV['width'],
-  height=ENV['height'],
-  quality=ENV['quality']
-):
+width   = ENV['width']
+height  = ENV['height']
+
+def create_camera(width=width, height=height):
   picam2 = Picamera2()
   picam2.video_configuration.size = (width, height)
-  encoder = Encoder(q=quality)
-  return picam2, encoder
+  return picam2
 
-def create_encoder(Encoder=ENCODERS['jpeg'], quality=ENV['quality']):
+def create_encoder(encoder_type=ENV['encoder'], quality=ENV['quality']):
+  Encoder = ENCODERS.get(encoder_type, ENV['encoder'])
   encoder = Encoder(q=quality)
   return encoder
