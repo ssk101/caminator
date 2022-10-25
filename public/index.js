@@ -8,22 +8,11 @@ const {
   height,
 } = main.dataset
 
-function makeStreamContainer() {
-  const src = `${root}?${Date.now()}`
-  const existing = main.querySelector('img')
+function updateStream() {
+  const url = `url(${root}?${Date.now()})`
+  let stream = main.querySelector('#stream')
 
-  if(existing) {
-    existing.src = src
-    return
-  }
-
-  const img = Object.assign(document.createElement('img'), {
-    width,
-    height,
-    src,
-  })
-
-  main.insertAdjacentElement('afterbegin', img)
+  stream.style.backgroundImage = url
 }
 
 async function getControls() {
@@ -59,7 +48,7 @@ async function setControls(e) {
   }).then(res => res.json())
 
   updateControls(response)
-  makeStreamContainer()
+  updateStream()
 }
 
 const debounce = (cb, delay = 1000) => {
@@ -145,7 +134,7 @@ const controls = Object.assign(document.createElement('div'), {
 
 main.append(controls)
 
-makeStreamContainer()
+updateStream()
 
 const cameraControls = await getControls()
 
