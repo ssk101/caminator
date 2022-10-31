@@ -27,13 +27,6 @@ TYPES = {
 }
 
 CONTROLS = {
-  # 'ScalerCrop': {
-  #   'type': 'list',
-  #   'controlType': 'input',
-  #   'description': ['X', 'Y', 'width', 'height'],
-  #   'step': 1,
-  #   'value': [0, 0, ENV.get('width', 1296), ENV.get('height', 972)],
-  # },
   'Quality': {
     'type': 'int',
     'controlType': 'range',
@@ -43,15 +36,6 @@ CONTROLS = {
     'max': 100,
     'value': ENV['quality'],
   },
-  # 'ColourFilterArrangement': {
-  #   'type': 'int',
-  #   'controlType': 'range',
-  #   'description': ['RGGB', 'GRBG', 'GBRG', 'BGGR', 'monochrome'],
-  #   'value': 0,
-  #   'min': 0,
-  #   'max': 4,
-  #   'step': 1.
-  # },
   'AeEnable': {
     'type': 'bool',
     'controlType': 'checkbox',
@@ -217,13 +201,17 @@ def on_controls():
     body = request.get_json()
 
     try:
-      set_camera_meta(body)
+      set_controls(body)
 
     except Exception as e:
       logging.error(e)
 
   except Exception as e:
     logging.error(e)
+
+  logging.info('#################################################')
+  logging.info(picam2.controls)
+  logging.info('#################################################')
 
   return json.dumps(formatted_meta())
 
@@ -250,38 +238,58 @@ def formatted_meta():
 
   return formatted
 
-def set_camera_meta(meta={}):
-  sanitized = dict()
+def set_default_controls():
+  cc = picam2.camera_controls
+  logging.info('#################################################')
+  logging.info(picam2.controls)
+  logging.info('#################################################')
 
   for key in CONTROLS:
+    if key == 'Quality':
+      continue
+
+    try:
+      mn, mx, vl = cc.get(key)
+    except:
+      continue
+
+    CONTROLS[key]['min'] = mn
+    CONTROLS[key]['max'] = mx
+    CONTROLS[key]['value'] = vl
+
     t = TYPES[CONTROLS[key]['type']]
 
-    value = meta.get(key)
+    with picam2.controls as controls:
+      setattr(controls, key, t(CONTROLS[key]['value']))
+
+def set_controls(body={}):
+  for key in body:
+    t = TYPES[CONTROLS[key]['type']]
+
+    value = body[key]
 
     if value is not None:
-      CONTROLS[key]['value'] = meta[key]
-
-    # if key == 'ScalerCrop':
-    #   if value is not None:
+      CONTROLS[key]['value'] = body[key]
 
     if key == 'Quality':
       if value is not None:
         stop_start(quality=value)
       continue
 
-    sanitized[key] = t(CONTROLS[key]['value'])
+    try:
+      with picam2.controls as controls:
+        setattr(controls, key, t(CONTROLS[key]['value']))
+    except Exception as e:
+      logging.error(e)
 
-  try:
-    logging.info(sanitized)
-    picam2.set_controls(sanitized)
-  except Exception as e:
-    logging.error(e)
+    logging.info(picam2.camera_controls)
+
 
 if __name__ == '__main__':
   try:
     picam2 = create_camera()
     stop_start(quality=CONTROLS['Quality']['value'])
-    set_camera_meta()
+    set_default_controls()
 
     try:
       app.run(host=ENV['host'], port=ENV['port'], threaded=True)
