@@ -209,10 +209,6 @@ def on_controls():
   except Exception as e:
     logging.error(e)
 
-  logging.info('#################################################')
-  logging.info(picam2.controls)
-  logging.info('#################################################')
-
   return json.dumps(formatted_meta())
 
 def formatted_meta():
@@ -239,10 +235,8 @@ def formatted_meta():
   return formatted
 
 def set_default_controls():
+  controls = dict()
   cc = picam2.camera_controls
-  logging.info('#################################################')
-  logging.info(picam2.controls)
-  logging.info('#################################################')
 
   for key in CONTROLS:
     if key == 'Quality':
@@ -258,31 +252,29 @@ def set_default_controls():
     CONTROLS[key]['value'] = vl
 
     t = TYPES[CONTROLS[key]['type']]
+    controls[key] = t(CONTROLS[key]['value'])
 
-    with picam2.controls as controls:
-      setattr(controls, key, t(CONTROLS[key]['value']))
+  logging.info(controls)
+  picam2.set_controls(controls)
 
 def set_controls(body={}):
-  for key in body:
+  controls = dict()
+
+  for key in CONTROLS:
     t = TYPES[CONTROLS[key]['type']]
 
-    value = body[key]
-
-    if value is not None:
+    if body.get(key) is not None:
       CONTROLS[key]['value'] = body[key]
 
     if key == 'Quality':
-      if value is not None:
-        stop_start(quality=value)
+      if body.get(key) is not None:
+        stop_start(quality=body[key])
       continue
 
-    try:
-      with picam2.controls as controls:
-        setattr(controls, key, t(CONTROLS[key]['value']))
-    except Exception as e:
-      logging.error(e)
+    controls[key] = t(CONTROLS[key]['value'])
 
-    logging.info(picam2.camera_controls)
+  logging.info(controls)
+  picam2.set_controls(controls)
 
 
 if __name__ == '__main__':
