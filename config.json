@@ -2,6 +2,7 @@
   "width": 1296,
   "height": 972,
   "quality": 75,
+  "fps": 42,
   "frame_delay": 0.1,
   "encoder": "jpeg",
   "port": 8888,

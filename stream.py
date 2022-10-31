@@ -27,6 +27,13 @@ TYPES = {
 }
 
 CONTROLS = {
+  # 'ScalerCrop': {
+  #   'type': 'list',
+  #   'controlType': 'input',
+  #   'description': ['X', 'Y', 'width', 'height'],
+  #   'step': 1,
+  #   'value': [0, 0, ENV.get('width', 1296), ENV.get('height', 972)],
+  # },
   'Quality': {
     'type': 'int',
     'controlType': 'range',
@@ -36,6 +43,15 @@ CONTROLS = {
     'max': 100,
     'value': ENV['quality'],
   },
+  # 'ColourFilterArrangement': {
+  #   'type': 'int',
+  #   'controlType': 'range',
+  #   'description': ['RGGB', 'GRBG', 'GBRG', 'BGGR', 'monochrome'],
+  #   'value': 0,
+  #   'min': 0,
+  #   'max': 4,
+  #   'step': 1.
+  # },
   'AeEnable': {
     'type': 'bool',
     'controlType': 'checkbox',
@@ -87,20 +103,20 @@ CONTROLS = {
     'max': 2,
     'description': ['Off', 'Fast', 'HQ'],
   },
-  'FrameDurationLimits': {
-    'type': 'tuple',
-    'controlType': 'input',
-    'step': 1000,
-    'min': 33333,
-    'max': 120000,
-    'value': [33333, 33333],
+  'FrameRate': {
+    'type': 'int',
+    'controlType': 'range',
+    'step': 1,
+    'min': 1,
+    'max': 90,
+    'value': ENV.get('fps', 42),
   },
   'ExposureTime': {
     'type': 'int',
     'controlType': 'range',
     'step': 1000,
     'min': 0,
-    'max': 66666,
+    'max': 400000,
     'value': 0,
   },
   'ExposureValue': {
@@ -244,6 +260,9 @@ def set_camera_meta(meta={}):
 
     if value is not None:
       CONTROLS[key]['value'] = meta[key]
+
+    # if key == 'ScalerCrop':
+    #   if value is not None:
 
     if key == 'Quality':
       if value is not None:
