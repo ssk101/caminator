@@ -40,7 +40,7 @@ async function setControls(e) {
   const values = []
 
   for(const input of Array.from(inputs.querySelectorAll('input'))) {
-    const v = input.type === 'checkbox' ? Boolean(input.value) : Number(input.value)
+    const v = Number(input.value)
     values.push(v)
   }
 
@@ -93,13 +93,7 @@ function makeControlGroup(controlType, controlName, value, description = [], nam
       },
     })
 
-    if(typeof v === 'boolean') {
-      input.checked = v
-      input.value = Number(v)
-    } else if(typeof v === 'number') {
-      input.value = parseFloat(v)
-    }
-
+    input.value = parseFloat(v)
     return input
   }
 
@@ -143,7 +137,13 @@ async function updateControls(meta) {
         textContent: `${controlName}: ${v}`,
         title: description.join(', '),
       })
-      inputs.querySelector('input').value = v
+
+      const input = inputs.querySelector('input')
+      input.value = v
+
+      if(['checkbox', 'radio'].includes(input.type)) {
+        input.setAttribute('checked', !!v)
+      }
     }
   }
 }

@@ -40,12 +40,12 @@ CONTROLS = {
   'AeEnable': {
     'type': 'bool',
     'controlType': 'checkbox',
-    'value': False,
+    'value': 0,
   },
   'AwbEnable': {
     'type': 'bool',
     'controlType': 'checkbox',
-    'value': False,
+    'value': 0,
   },
   'AwbMode': {
     'type': 'int',
@@ -154,12 +154,15 @@ MODES = {
   'Night': {
     'value': False,
     'controls': {
+      'Contrast': 1,
+      'Sharpness': 1,
+      'Brightness': 0,
       'AnalogueGain': 'max',
       'ExposureValue': 'max',
       'ExposureTime': 'max',
-      'FrameRate': 2,
-      'AwbEnable': True,
-      'AeEnable': True,
+      'FrameRate': 1,
+      'AwbEnable': 1,
+      'AeEnable': 1,
       'AwbMode': 5,
       'AeExposureMode': 2,
       'NoiseReductionMode': 'max',
@@ -168,12 +171,15 @@ MODES = {
   'Day': {
     'value': True,
     'controls': {
+      'Contrast': 1,
+      'Sharpness': 1,
+      'Brightness': 0,
       'AnalogueGain': 0,
       'ExposureValue': 0,
       'ExposureTime': 0,
       'FrameRate': 'max',
-      'AwbEnable': True,
-      'AeEnable': True,
+      'AwbEnable': 1,
+      'AeEnable': 1,
       'AwbMode': 4,
       'AeExposureMode': 0,
       'NoiseReductionMode': 0,
