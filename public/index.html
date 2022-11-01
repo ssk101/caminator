@@ -58,9 +58,8 @@
       padding: 0;
     }
     #controls {
-      display: grid;
-      grid-template-columns: repeat(9, max-content);
-      grid-gap: 5px;
+      display: flex;
+      flex-wrap: wrap;
       padding: 5px;
       font-size: .8em;
       box-sizing: border-box;
@@ -74,6 +73,7 @@
       grid-gap: 5px;
       justify-items: center;
       background: rgba(0,0,0,0.5);
+      border: 1px solid rgba(255, 255, 255, 0.23);
     }
     #controls .control .inputs {
       display: grid;
