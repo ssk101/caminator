@@ -7,6 +7,7 @@ import json
 import logging
 import time
 import socketserver
+import math
 from http import server
 from flask import Flask, Response, request, redirect
 from threading import Condition
@@ -53,6 +54,7 @@ CONTROLS = {
     'value': 0,
     'min': 0,
     'max': 6,
+    'noOverrideMax': True,
     'description': ['Auto', 'Tungsten', 'Fluorescent', 'Indoor', 'Daylight', 'Cloudy'],
   },
   'AeConstraintMode': {
@@ -61,6 +63,7 @@ CONTROLS = {
     'min': 0,
     'max': 1,
     'value': 0,
+    'noOverrideMax': True,
     'description': ['Normal', 'Highlights'],
   },
   'AeExposureMode': {
@@ -69,6 +72,7 @@ CONTROLS = {
     'min': 0,
     'max': 2,
     'value': 0,
+    'noOverrideMax': True,
     'description': ['Normal', 'Short', 'Long'],
   },
   'AeMeteringMode': {
@@ -77,6 +81,7 @@ CONTROLS = {
     'min': 0,
     'max': 2,
     'value': 0,
+    'noOverrideMax': True,
     'description': ['CentreWeighted', 'Spot', 'Matrix'],
   },
   'NoiseReductionMode': {
@@ -145,6 +150,37 @@ CONTROLS = {
   },
 }
 
+MODES = {
+  'Night': {
+    'value': False,
+    'controls': {
+      'AnalogueGain': 'max',
+      'ExposureValue': 'max',
+      'ExposureTime': 'max',
+      'FrameRate': 2,
+      'AwbEnable': True,
+      'AeEnable': True,
+      'AwbMode': 5,
+      'AeExposureMode': 2,
+      'NoiseReductionMode': 'max',
+    },
+  },
+  'Day': {
+    'value': True,
+    'controls': {
+      'AnalogueGain': 0,
+      'ExposureValue': 0,
+      'ExposureTime': 0,
+      'FrameRate': 'max',
+      'AwbEnable': True,
+      'AeEnable': True,
+      'AwbMode': 4,
+      'AeExposureMode': 0,
+      'NoiseReductionMode': 0,
+    },
+  },
+}
+
 frame_delay = ENV['frame_delay']
 
 class StreamingOutput(io.BufferedIOBase):
@@ -189,9 +225,23 @@ def relay():
 def on_slash():
   return Response(relay(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
+
 @app.route('/meta')
 def on_meta():
   return json.dumps(formatted_meta())
+
+
+@app.route('/modes')
+def on_modes():
+  return json.dumps(MODES)
+
+
+@app.route('/mode', methods = ['POST'])
+def on_mode():
+  body = request.get_json()
+  set_mode(body['mode'])
+  return json.dumps(formatted_meta())
+
 
 @app.route('/controls', methods = ['POST'])
 def on_controls():
@@ -234,6 +284,13 @@ def formatted_meta():
 
   return formatted
 
+def set_mode(mode):
+  set_default_controls()
+  time.sleep(2)
+  logging.info(mode)
+  set_controls(MODES[mode]['controls'])
+
+
 def set_default_controls():
   controls = dict()
   cc = picam2.camera_controls
@@ -248,7 +305,10 @@ def set_default_controls():
       continue
 
     CONTROLS[key]['min'] = mn
-    CONTROLS[key]['max'] = mx
+
+    if CONTROLS.get('noOverrideMax') is not True:
+      CONTROLS[key]['max'] = mx
+
     CONTROLS[key]['value'] = vl
 
     t = TYPES[CONTROLS[key]['type']]
@@ -262,14 +322,22 @@ def set_controls(body={}):
 
   for key in CONTROLS:
     t = TYPES[CONTROLS[key]['type']]
-
-    if body.get(key) is not None:
-      CONTROLS[key]['value'] = body[key]
+    value = body.get(key)
 
     if key == 'Quality':
-      if body.get(key) is not None:
+      if value is not None:
         stop_start(quality=body[key])
       continue
+
+    if value is not None:
+      if value == 'max':
+        try:
+          value = math.floor(float(picam2.camera_controls.get(key)[1]))
+        except Exception as e:
+          logging.error(e)
+          continue
+
+      CONTROLS[key]['value'] = value
 
     controls[key] = t(CONTROLS[key]['value'])
 

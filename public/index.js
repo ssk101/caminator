@@ -8,6 +8,22 @@ const {
   height,
 } = main.dataset
 
+async function get(endpoint, body = {}, method = 'get') {
+  const data = {
+    method,
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  }
+
+  if(method.toLowerCase() === 'post') {
+    data.body = JSON.stringify(body)
+  }
+
+  return fetch(`${main.dataset.root}/${endpoint}`, data)
+    .then(res => res.json())
+}
+
 function updateStream() {
   const url = `url(${root}?${Date.now()})`
   let stream = main.querySelector('#stream')
@@ -16,12 +32,7 @@ function updateStream() {
 }
 
 async function getControls() {
-  return await fetch(`${main.dataset.root}/meta`, {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-  }).then(res => res.json())
+  return get('meta')
 }
 
 async function setControls(e) {
@@ -37,17 +48,26 @@ async function setControls(e) {
 
   inputs.dataset.values = actualValues
 
-  const response = await fetch(`${main.dataset.root}/controls`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      [e.target.name]: actualValues,
-    })
-  }).then(res => res.json())
+  const body = {
+    [e.target.name]: actualValues,
+  }
+
+  const response = await get('controls', body, 'post')
 
   updateControls(response)
+  updateStream()
+}
+
+async function getModes() {
+  return get('modes')
+}
+
+async function setMode(e) {
+  const body = {
+    mode: e.target.id,
+  }
+  const controls = await get('mode', body, 'post')
+  updateControls(controls)
   updateStream()
 }
 
@@ -62,10 +82,10 @@ const debounce = (cb, delay = 1000) => {
   }, delay)
 }
 
-function makeControlGroup(controlType, controlName, value, description = [], cb) {
+function makeControlGroup(controlType, controlName, value, description = [], name, cb) {
   const makeInput = (v) => {
     const input = Object.assign(document.createElement('input'), {
-      name: controlName,
+      name: name || controlName,
       placeholder: controlName,
       type: controlType,
       oninput: (e) => {
@@ -85,7 +105,7 @@ function makeControlGroup(controlType, controlName, value, description = [], cb)
 
   const makeLabel = (v) => {
     return Object.assign(document.createElement('label'), {
-      textContent: `${controlName}: ${v}`,
+      textContent: `${controlName}${controlType !== 'radio' ? ': ' + v : ''}`,
       title: description.join(', '),
     })
   }
@@ -137,6 +157,20 @@ main.append(controls)
 updateStream()
 
 const cameraControls = await getControls()
+const modes = await getModes()
+
+for(const mode of Object.keys(modes)) {
+  const controlGroup = makeControlGroup(
+    'radio',
+    mode,
+    modes[mode].value,
+    [],
+    'modes',
+    setMode,
+  )
+  controlGroup.querySelector('input').id = mode
+  controls.insertAdjacentElement('afterbegin', controlGroup)
+}
 
 for(const [controlName, controlData] of Object.entries(cameraControls)) {
   const { controlType, value, description = [] } = controlData
@@ -145,6 +179,7 @@ for(const [controlName, controlData] of Object.entries(cameraControls)) {
     controlName,
     value,
     description,
+    controlName,
     setControls,
   )
 
