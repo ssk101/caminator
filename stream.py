@@ -180,7 +180,7 @@ MODES = {
       'FrameRate': 'max',
       'AwbEnable': 1,
       'AeEnable': 1,
-      'AwbMode': 4,
+      'AwbMode': 2,
       'AeExposureMode': 0,
       'NoiseReductionMode': 0,
     },
@@ -338,9 +338,21 @@ def set_controls(body={}):
     if value is not None:
       if value == 'max':
         try:
-          value = math.floor(float(picam2.camera_controls.get(key)[1]))
+          control_value = picam2.camera_controls.get(key)
+
+          if control_value:
+            value = control_value[1]
+          else:
+            value = CONTROLS[key]['max']
+
+          value = math.floor(float(value))
+
         except Exception as e:
-          logging.error(e)
+          logging.error({
+            'error': e,
+            'key': key,
+            'value': value,
+          })
           continue
 
       CONTROLS[key]['value'] = value
