@@ -1,4 +1,47 @@
+function clamp(val, min, max) {
+  return Math.max(+min, Math.min(+val, +max))
+}
+
 const main = document.body.querySelector('main')
+const stream = main.querySelector('#stream')
+const overlay = main.querySelector('#overlay')
+
+let zoomFactor = 1
+
+function zoom(e, factor = 1) {
+  overlay.style.display = 'block'
+
+  const x = (((stream.clientWidth) / 2) - (e.clientX))
+  const y = (((stream.clientHeight) / 2) - (e.clientY))
+
+  stream.style.transform = `translate(${x * factor}px, ${y * factor}px) scale(${factor * 100}%)`
+
+  setTimeout(() => overlay.style.display = 'none', 1500)
+}
+
+stream.addEventListener('wheel', (e) => {
+  e.preventDefault()
+  const { wheelDelta } = e
+  const direction = wheelDelta < 0 ? -1 : 1
+  zoomFactor = clamp(zoomFactor + direction, 0, 100)
+  zoom(e, zoomFactor)
+})
+
+stream.addEventListener('click', (e) => {
+  const zoomed = stream.getAttribute('data-zoomed')
+
+  if(!zoomed) {
+    stream.setAttribute('data-zoomed', !zoomed)
+  } else {
+    stream.removeAttribute('data-zoomed')
+  }
+
+  if(!zoomed) {
+    zoom(e, 3)
+  } else {
+    stream.style.transform = ''
+  }
+})
 let waiting
 
 const {
@@ -26,8 +69,6 @@ async function get(endpoint, body = {}, method = 'get') {
 
 function updateStream() {
   const url = `url(${root}?${Date.now()})`
-  let stream = main.querySelector('#stream')
-
   stream.style.backgroundImage = url
 }
 
@@ -40,7 +81,7 @@ async function setControls(e) {
   const values = []
 
   for(const input of Array.from(inputs.querySelectorAll('input'))) {
-    const v = Number(input.value)
+    const v = Number(input.type === 'checkbox' ? input.checked : input.value)
     values.push(v)
   }
 
@@ -84,7 +125,9 @@ const debounce = (cb, delay = 1000) => {
 
 function makeControlGroup(controlType, controlName, value, description = [], name, cb) {
   const makeInput = (v) => {
-    const input = Object.assign(document.createElement('input'), {
+    const input = document.createElement('input')
+
+    Object.assign(input, {
       name: name || controlName,
       placeholder: controlName,
       type: controlType,
@@ -139,10 +182,11 @@ async function updateControls(meta) {
       })
 
       const input = inputs.querySelector('input')
-      input.value = v
 
       if(['checkbox', 'radio'].includes(input.type)) {
-        input.setAttribute('checked', !!v)
+        input.value = Number(input.checked)
+      } else {
+        input.value = v
       }
     }
   }
@@ -191,5 +235,3 @@ for(const [controlName, controlData] of Object.entries(cameraControls)) {
 
   controls.insertAdjacentElement('afterbegin', controlGroup)
 }
-
-

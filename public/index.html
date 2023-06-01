@@ -97,6 +97,36 @@
       height: 20px;
       width: 65px;
     }
+    #overlay {
+      display: none;
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+    }
+    #overlay .x,
+    #overlay .y {
+      position: absolute;
+    }
+    #overlay .x {
+      height: 1px;
+      width: 100%;
+      background: #ff0000;
+      left: 0;
+      right: 0;
+      top: 50%;
+    }
+    #overlay .y {
+      width: 1px;
+      height: 100%;
+      background: #ff0000;
+      top: 0;
+      bottom: 0;
+      left: 50%;
+    }
   </style>
   <script src="./index.js" type="module"></script>
   <main
@@ -106,6 +136,10 @@
     data-height="$CAMINATOR_HEIGHT"
   >
     <div id="stream"></div>
+    <div id="overlay">
+      <div class="x"></div>
+      <div class="y"></div>
+    </div>
   </main>
 </body>
 </html>

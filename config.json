@@ -1,9 +1,9 @@
 {
   "width": 2592,
   "height": 1944,
-  "quality": 75,
+  "quality": 90,
   "fps": 42,
-  "frame_delay": 0.1,
+  "frame_delay": 0.05,
   "encoder": "jpeg",
   "port": 8888,
   "host": "0.0.0.0",

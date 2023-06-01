@@ -27,6 +27,8 @@ TYPES = {
   'tuple': tuple,
 }
 
+print(ENV)
+
 CONTROLS = {
   'Quality': {
     'type': 'int',
