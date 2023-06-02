@@ -14,6 +14,7 @@ from threading import Condition
 from picamera2.outputs import FileOutput
 from lib.helpers import get_env, exit_self
 from lib.camera import create_camera, create_encoder
+from libcamera import controls as libcontrols
 
 ENV = get_env()
 app = Flask(__name__)
@@ -48,6 +49,25 @@ CONTROLS = {
     'type': 'bool',
     'controlType': 'checkbox',
     'value': 0,
+  },
+  'AfMode': {
+    'type': 'int',
+    'controlType': 'range',
+    'step': 1,
+    'value': 2,
+    'min': 0,
+    'max': 2,
+    'noOverrideMax': True,
+    'description': ['Manual', 'Auto', 'Continuous']
+  },
+  'LensPosition': {
+    'type': 'float',
+    'controlType': 'range',
+    'step': 0.1,
+    'value': 1.0,
+    'min': 0.0,
+    'max': 12.0,
+    'noOverrideMax': True,
   },
   'AwbMode': {
     'type': 'int',
@@ -108,7 +128,7 @@ CONTROLS = {
     'step': 1000,
     'min': 0,
     'max': 400000,
-    'value': 0,
+    'value': 0.0,
   },
   'ExposureValue': {
     'type': 'float',
@@ -166,6 +186,8 @@ MODES = {
       'AwbEnable': 1,
       'AeEnable': 1,
       'AwbMode': 5,
+      'AfMode': 2,
+      'LensPosition': 1.0,
       'AeExposureMode': 2,
       'NoiseReductionMode': 'max',
     },
@@ -183,6 +205,8 @@ MODES = {
       'AwbEnable': 1,
       'AeEnable': 1,
       'AwbMode': 2,
+      'AfMode': 2,
+      'LensPosition': 1.0,
       'AeExposureMode': 0,
       'NoiseReductionMode': 0,
     },
@@ -316,9 +340,17 @@ def formatted_meta():
 def set_mode(mode):
   set_default_controls()
   time.sleep(2)
-  logging.info(mode)
   set_controls(MODES[mode]['controls'])
 
+
+def print_af_state(request):
+  md = request.get_metadata()
+  print(("Idle", "Scanning", "Success", "Fail")[md['AfState']], md.get('LensPosition'))
+
+def autofocus_cycle():
+  picam2.pre_callback = print_af_state
+  success = picam2.autofocus_cycle()
+  picam2.pre_callback = None
 
 def set_default_controls():
   controls = dict()
@@ -330,6 +362,7 @@ def set_default_controls():
 
     try:
       mn, mx, vl = cc.get(key)
+      print(key, mn, mx, vl)
     except:
       continue
 
@@ -338,13 +371,18 @@ def set_default_controls():
     if CONTROLS.get('noOverrideMax') is not True:
       CONTROLS[key]['max'] = mx
 
-    CONTROLS[key]['value'] = vl
+    if CONTROLS[key]['value'] is None:
+      CONTROLS[key]['value'] = vl if vl is not None else 0
 
     t = TYPES[CONTROLS[key]['type']]
     controls[key] = t(CONTROLS[key]['value'])
 
   logging.info(controls)
-  picam2.set_controls(controls)
+
+  try:
+    picam2.set_controls(controls)
+  except Exception as e:
+    logging.error(e)
 
 
 def set_controls(body={}):
@@ -384,7 +422,11 @@ def set_controls(body={}):
     controls[key] = t(CONTROLS[key]['value'])
 
   logging.info(controls)
-  picam2.set_controls(controls)
+
+  try:
+    picam2.set_controls(controls)
+  except Exception as e:
+    logging.error(e)
 
 
 if __name__ == '__main__':
