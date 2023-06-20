@@ -42,6 +42,7 @@ def get_env():
     'encoder'      : str(os.getenv('CAMINATOR_ENCODER', config.get('encoder', 'jpeg'))),
     'quality'      : int(os.getenv('CAMINATOR_QUALITY', config.get('quality', 75))),
     'frame_delay'  : float(os.getenv('CAMINATOR_FRAME_DELAY', config.get('frame_delay', 0.1))),
+    'fps'          : int(os.getenv('CAMINATOR_FPS', config.get('fps', 42))),
     'port'         : int(os.getenv('CAMINATOR_PORT', config.get('port', 8888))),
     'host'         : str(os.getenv('CAMINATOR_HOST', config.get('host', '0.0.0.0'))),
     'title'        : str(os.getenv('CAMINATOR_TITLE', config.get('title', 'Caminator'))),
