@@ -1,4 +1,12 @@
 # Caminator
+### Setup
+```bash
+apt install python3-picamera2
+python -m venv ./venv
+source ./venv/bin/activate
+pip install -r ./requirements.txt
+```
+
 ### Starting web server
 
 Start camera stream:
